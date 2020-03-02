@@ -1,0 +1,39 @@
+authorName: default
+experimentName: benchmark_goal_tuning_test
+maxExecDuration: 1000h
+maxTrialNum: 3000  # 1000 [100 - ?]
+searchSpacePath: Training/search_space_Soccer.json  # TODO
+useAnnotation: false
+nniManagerIp: 172.23.234.89  # TODO for multiple eth
+
+tuner:
+  builtinTunerName: TPE
+  classArgs:
+    optimize_mode: maximize
+
+# assessor:
+#  builtinAssessorName: Medianstop
+#  classArgs:
+#    optimize_mode: maximize
+
+trainingServicePlatform: pai
+trialConcurrency: 8
+trial:
+  command: pip3 install --user numpy torch torchvision pyro-ppl tensorboardX && pip3 install --user gym==0.12 lightgbm nni hdfs && pip3 install --user -e git+https://github.com/cycraig/gym-goal#egg=gym_goal && pip3 install --user -e git+https://github.com/cycraig/gym-platform#egg=gym_platform && apt-get update -y && apt-get install -y flex && apt install -y qt4-default && python3 run_benchmark_nni.py --env_name Goal-v0 --train_episodes 250000
+  codeDir: .
+  gpuNum: 1
+  cpuNum: 3
+  memoryMB: 32384
+  image: leejoe/deepo:latest
+  virtualCluster: debug
+  nniManagerNFSMountPath: /data/data0/xuehui/workspace/mnt/xuehui
+  containerNFSMountPath: /data/xuehui
+  paiStoragePlugin: teamwise_storage
+
+paiConfig:
+  # userName: openmindstudio
+  # passWord: Passq1w2e3r4
+  # host: 10.151.40.179
+  userName: xuehui
+  token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Inh1ZWh1aSIsImFwcGxpY2F0aW9uIjp0cnVlLCJpYXQiOjE1ODA1NDM3Njl9.hP2-8Bih_v4xb1wHuFcmXR16Za6Ze79jl1asb_WmKbo
+  host: https://gcrv100.openp.ai

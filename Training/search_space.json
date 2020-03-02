@@ -1,0 +1,53 @@
+{
+  "batch_size": {
+    "_type": "choice",
+    "_value": [
+      32,
+      128,
+      256
+    ]
+  },
+  "hidden_size": {
+    "_type": "choice",
+    "_value": [
+      512,
+      1024
+    ]
+  },
+  "gamma": {
+    "_type": "choice",
+    "_value": [
+      0.95,
+      0.99,
+      0.997
+    ]
+  },
+  "policy_lr": {
+    "_type": "loguniform",
+    "_value": [
+      1e-4,
+      1e-3
+    ]
+  },
+  "value_lr": {
+    "_type": "loguniform",
+    "_value": [
+      3e-4,
+      3e-3
+    ]
+  },
+  "discrete_log_prob_scale": {
+    "_type": "loguniform",
+    "_value": [
+      1,
+      30
+    ]
+  },
+  "soft_tau": {
+    "_type": "loguniform",
+    "_value": [
+      1e-3,
+      3e-2
+    ]
+  }
+}

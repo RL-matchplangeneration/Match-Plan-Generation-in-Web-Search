@@ -30,7 +30,7 @@ trial:
   containerNFSMountPath: /data/
   paiStoragePlugin: teamwise_storage
 
-paiConfig:
+paiConfig:  # TODO
   # userName: openmindstudio
   # passWord: Passq1w2e3r4
   # host: 10.151.40.179

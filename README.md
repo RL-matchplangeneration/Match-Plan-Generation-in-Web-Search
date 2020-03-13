@@ -1,4 +1,4 @@
-# Match Plan Generation inWeb Search with Parameterized Action Reinforcement Learning
+# Match Plan Generation in Web Search with Parameterized Action Reinforcement Learning
 
 ## About Environment Installation
 - match plan generation

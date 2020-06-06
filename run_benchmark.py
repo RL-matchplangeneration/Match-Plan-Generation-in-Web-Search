@@ -1,7 +1,7 @@
 import click
 import os
 import warnings
-from Benchmarks.experiment_benchmark import train, train_mlp
+from Benchmarks.experiment_benchmark import train_mlp
 import torch
 
 
@@ -81,7 +81,6 @@ def run(env,
     
     seed_torch(seed)
     warnings.filterwarnings("ignore")
-    # train for PASAC_LSTM, train_mlp for PASAC_MLP
     train_mlp(env, debug,
               seed, max_steps, train_episodes,
               batch_size, update_freq, eval_freq,

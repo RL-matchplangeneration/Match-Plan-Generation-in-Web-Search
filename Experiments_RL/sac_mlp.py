@@ -10,14 +10,14 @@ import codecs
 from Experiments_RL.experiment_base import HybridBase
 from Utils_RL.models import PASAC_QNetwork_MLP, PASAC_PolicyNetwork_MLP
 from Utils_RL.utils import copy_param, soft_update, \
-    v2id, ReplayBuffer_MLP, PrioritizedReplayBuffer_MLP
+    v2id, ReplayBuffer_MLP, SPER_MLP
 
 
 class PASAC_Agent_MLP(HybridBase):
     def __init__(self, debug, weights, gamma, replay_buffer_size, max_steps,
                  hidden_size, value_lr, policy_lr, batch_size, state_dim,
                  action_discrete_dim, action_continuous_dim,
-                 soft_tau, use_exp):
+                 soft_tau, use_exp, reward_l=0, reward_h=1, data_bin=8):
         super(PASAC_Agent_MLP, self).__init__(debug, weights, gamma, replay_buffer_size, max_steps,
                                              hidden_size, value_lr, policy_lr, batch_size, state_dim,
                                              action_discrete_dim, action_continuous_dim)
@@ -25,7 +25,7 @@ class PASAC_Agent_MLP(HybridBase):
         if debug['replay_buffer'] == 'r':
             self.replay_buffer = ReplayBuffer_MLP(replay_buffer_size)
         elif debug['replay_buffer'] == 'p':
-            self.replay_buffer = PrioritizedReplayBuffer_MLP(replay_buffer_size)
+            self.replay_buffer = SPER_MLP(replay_buffer_size, 'uniform', reward_l, reward_h, data_bin)
 
         self.soft_q_net1 = PASAC_QNetwork_MLP(max_steps, 
                                               state_dim, 
@@ -116,7 +116,7 @@ class PASAC_Agent_MLP(HybridBase):
                need_print=False):
         if isinstance(self.replay_buffer, ReplayBuffer_MLP):
             state, action_v, param, reward, next_state, done = self.replay_buffer.sample(batch_size)
-        elif isinstance(self.replay_buffer, PrioritizedReplayBuffer_MLP):
+        elif isinstance(self.replay_buffer, SPER_MLP):
             batch, indices, weights = self.replay_buffer.sample(batch_size)
             state, action_v, param, reward, next_state, done = batch
             weights = torch.FloatTensor(weights).unsqueeze(-1).unsqueeze(-1).to(self.device)
@@ -216,7 +216,7 @@ class PASAC_Agent_MLP(HybridBase):
             self.alpha_d * action_sum_log_prob - predicted_new_q_value
 
         # [compute total loss]
-        if isinstance(self.replay_buffer, PrioritizedReplayBuffer_MLP):
+        if isinstance(self.replay_buffer, SPER_MLP):
             errors_sum = (q_value_loss1_elementwise.abs() +
                           q_value_loss2_elementwise.abs() +
                           policy_loss_elementwise.abs()).sum(dim=1)
@@ -252,7 +252,7 @@ class PASAC_Agent_MLP(HybridBase):
         soft_update(self.target_soft_q_net2, self.soft_q_net2, soft_tau)
 
         # [update priorities]
-        if isinstance(self.replay_buffer, PrioritizedReplayBuffer_MLP):
+        if isinstance(self.replay_buffer, SPER_MLP):
             self.replay_buffer.priority_update(indices, errors_sum.reshape(batch_size).tolist())
 
         return predicted_new_q_value.mean()

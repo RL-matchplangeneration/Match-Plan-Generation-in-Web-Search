@@ -26,5 +26,5 @@
 
 - Parameters: 
 
-  Refer to the code run_xxx.py
+  - referring to the code run_xxx.py
 

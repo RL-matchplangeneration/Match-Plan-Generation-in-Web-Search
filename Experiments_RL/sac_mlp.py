@@ -113,12 +113,12 @@ class PASAC_Agent_MLP(HybridBase):
         return action, action_enc, action_v, param
 
     def update(self, batch_size, auto_entropy=True, target_entropy=-2, gamma=0.99, soft_tau=1e-2,
-               need_print=False):
+               need_print=False, ep=None):
         if isinstance(self.replay_buffer, ReplayBuffer_MLP):
             state, action_v, param, reward, next_state, done = self.replay_buffer.sample(batch_size)
         elif isinstance(self.replay_buffer, SPER_MLP):
             batch, indices, weights = self.replay_buffer.sample(batch_size)
-            state, action_v, param, reward, next_state, done = batch
+            state, action_v, param, reward, next_state, done, _ = batch
             weights = torch.FloatTensor(weights).unsqueeze(-1).unsqueeze(-1).to(self.device)
         else:
             raise NotImplementedError
@@ -217,7 +217,7 @@ class PASAC_Agent_MLP(HybridBase):
 
         # [compute total loss]
         if isinstance(self.replay_buffer, SPER_MLP):
-            errors_sum = (q_value_loss1_elementwise.abs() +
+            td_pl = (q_value_loss1_elementwise.abs() +
                           q_value_loss2_elementwise.abs() +
                           policy_loss_elementwise.abs()).sum(dim=1)
             q_value_loss1 = (q_value_loss1_elementwise ** 2 * weights).mean()
@@ -253,6 +253,6 @@ class PASAC_Agent_MLP(HybridBase):
 
         # [update priorities]
         if isinstance(self.replay_buffer, SPER_MLP):
-            self.replay_buffer.priority_update(indices, errors_sum.reshape(batch_size).tolist())
+            self.replay_buffer.priority_update(indices, td_pl.reshape(batch_size).tolist())
 
         return predicted_new_q_value.mean()

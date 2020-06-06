@@ -9,11 +9,12 @@ from torch import nn
 from torch.nn.utils.rnn import pack_padded_sequence, pad_packed_sequence
 
 from Utils_RL.sum_tree import SumTree
-import pdb
+import itertools
 
 device = torch.device('cuda')
 d = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-PATransition = namedtuple('PATransition', ('state', 'action', 'param', 'reward', 'next_state', 'done'))  # ,
+PATransition = namedtuple('PATransition', ('state', 'action', 'param', 'reward', 'next_state', 'done')),
+Experience = namedtuple('Experience', 'obs1 act last_act rew obs2 done episode td st')
 
 
 ########################## (Parameterized) Action Utilities ##########################
@@ -103,7 +104,7 @@ class PrioritizedReplayBuffer_Original:
         """  push a sample into prioritized replay buffer"""
         self.buffer.add(self._max_priority, Experience(state, action, last_action, reward, next_state, done, episode, 0, 0))
 
-    def priority_update(self, indices, priorities, tds):
+    def priority_update(self, indices, priorities):
         """ The methods update samples's priority.
 
         Parameters
@@ -116,7 +117,8 @@ class PrioritizedReplayBuffer_Original:
             self._max_priority = max(self._max_priority, p)
             self.buffer.update(idx, p)
         for i in range(len(indices)):
-            self.buffer.data[indices[i]-self.buffer.capacity+1] = self.buffer[indices[i]-self.buffer.capacity+1]._replace(td=tds[i], st=self.buffer[indices[i]-self.buffer.capacity+1].st+1)
+            self.buffer.data[indices[i]-self.buffer.capacity+1] = self.buffer[indices[i]-self.buffer.capacity +
+                                                                              1]._replace(td=priorities[i], st=self.buffer[indices[i]-self.buffer.capacity+1].st+1)
 
     def sample(self, batch_size):
         """ sample batch_size data from replay buffer """
@@ -234,7 +236,7 @@ class SPER_MLP:
     def bin_size(self):
         return [len(b) for b in self.bins]
     
-    def priority_update(self, indices, priorities, tds):
+    def priority_update(self, indices, priorities):
         """ The methods update samples's priority.
 
         Parameters
@@ -242,7 +244,7 @@ class SPER_MLP:
         indices :
             list of sample indices
         """
-        for idx, error, td in zip(indices, priorities, tds):
+        for idx, error in zip(indices, priorities):
             if idx == -1:
                 continue
             if self.capacity_distribution=='uniform':
@@ -256,7 +258,7 @@ class SPER_MLP:
             idx_in_bin = idx - sum([abin.buffer.tree_size for abin in self.bins[:bin_id]])
             if idx_in_bin<0:
                 print(idx_in_bin)
-            self.bins[bin_id].priority_update([idx_in_bin],[error],[td])
+            self.bins[bin_id].priority_update([idx_in_bin],[error])
 
     def sample(self, batch_size):
         """ sample batch_size data from replay buffer """

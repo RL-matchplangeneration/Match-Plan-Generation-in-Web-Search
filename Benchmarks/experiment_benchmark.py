@@ -21,12 +21,12 @@ from Benchmarks.common.platform_domain import PlatformFlattenedActionWrapper
 from Utils_RL.utils import NormalizedHybridActions, v2id, PATransition
 
 import logging
-import nni
 
 logger = logging.getLogger('benchmark_goal_tuning')
 
 
 def train_nni(**kwargs):
+    import nni
     params = locals()['kwargs']  # get local parameters (in dict kwargs), including all arguments
     if params['use_nni']:
         try:
@@ -110,7 +110,7 @@ def train_mlp(env_name, debug,
             action, _, action_v, param = agent.act(state, debug['sampling'])
             next_state, reward, done, _ = env.step(action)
 
-            agent.replay_buffer.push(state, action_v, param, reward, next_state, done)
+            agent.replay_buffer.push(state, action_v, param, reward, next_state, done, episode)
 
             # -----move to the next step-----
             state = next_state
@@ -122,7 +122,8 @@ def train_mlp(env_name, debug,
                              auto_entropy=True,
                              soft_tau=soft_tau,
                              target_entropy=-1. * (action_continuous_dim),
-                             need_print=(episode % debug['print_freq'] == 0) and step == 0)
+                             need_print=(episode % debug['print_freq'] == 0) and step == 0,
+                             ep=episode)
 
             # -----done-----
             if done:

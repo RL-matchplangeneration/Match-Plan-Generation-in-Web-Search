@@ -53,8 +53,14 @@ def train_mlp(env_name, debug,
     assert env_name in ['Platform-v0', 'Goal-v0']
     if 'Goal' in env_name:
         import gym_goal
+        reward_l = -15
+        reward_h = 15
+        data_bin = 3
     if 'Platform' in env_name:
         import gym_platform
+        reward_l = 0
+        reward_h = 0.15
+        data_bin = 4
     env = gym.make(env_name)
     env = ScaledStateWrapper(env)
 
@@ -72,7 +78,7 @@ def train_mlp(env_name, debug,
     agent = PASAC_Agent_MLP(debug, weights, gamma, replay_buffer_size, max_steps,
                             hidden_size, value_lr, policy_lr, batch_size, state_dim,
                             action_discrete_dim, action_continuous_dim, soft_tau,
-                            use_exp)
+                            use_exp, reward_l, reward_h, data_bin)
 
     if isinstance(agent.replay_buffer, SPER_MLP):
         agent.replay_buffer.beta_increment_per_sampling = 1. / (max_steps * train_episodes)

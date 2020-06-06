@@ -10,7 +10,6 @@ import os
 import warnings
 from torch.utils.tensorboard import SummaryWriter
 
-from Experiments_RL.sac_lstm import PASAC_Agent_LSTM
 from Experiments_RL.sac_mlp import PASAC_Agent_MLP
 
 from Utils_RL.utils import SPER_MLP

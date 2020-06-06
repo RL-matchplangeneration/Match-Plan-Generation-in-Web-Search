@@ -64,7 +64,7 @@ def run(env_name,
         'sampling': True,
         'alpha_lr': 3e-4,  # learning rate for tuning PASAC alphas
         'L2_norm': 0,
-        'replay_buffer': 'p', # r for normal, p for prioritized
+        'replay_buffer': 'p', # r for normal ER, p for SPER
 
         'rnn_step': rnn_step
     }

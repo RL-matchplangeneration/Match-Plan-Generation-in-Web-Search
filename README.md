@@ -27,4 +27,5 @@
 - Parameters: 
 
   - referring to the code run_xxx.py
+  - loading checkpoint: see run_benchmark.py dict:debug,  load_filename = 'Goal_psac3_dl10_d100_320000_May_31_2020_16_26_12' (example)
 
